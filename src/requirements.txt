@@ -1,0 +1,10 @@
+# dependencies
+
+fastapi==0.110.2
+uvicorn[standard]
+python-multiport
+python-dotenv
+pydantic-settings
+
+# for chunking files before loading to memory
+aiofiles 
