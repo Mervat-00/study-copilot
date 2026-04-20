@@ -6,6 +6,7 @@ import os
 import aiofiles
 from models.enums import ResponseSignal
 import logging
+from .schemas.data import ProcessRequest
 
 logger = logging.getLogger('uvicorn.error')
 
@@ -54,3 +55,11 @@ async def upload_data(project_id: str , file : UploadFile ,
             }
     )
 
+
+#create endpoint to process the uploaded file
+# data is sent as json object 
+@data_router.post('/process/{project_id}')
+async def process_data(project_id: str , request:ProcessRequest ):
+  file_id = request.file_id
+  return file_id
+  
