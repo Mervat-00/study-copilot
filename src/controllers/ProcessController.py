@@ -1,10 +1,8 @@
 from .BaseController import BaseController
 from .ProjectController import ProjectController
 import os
-from langchain import TextLoader
-from langchain import PyMuPDFLoader
+from langchain import TextLoader ,  PyMuPDFLoader , RecursiveCharacterTextSplitter
 from models.enums import ProcessingEnum
-from langchain import RecursiveCharacterTextSplitter
 
 class ProcessController(BaseController):
   def __init__(self , project_id:str):
