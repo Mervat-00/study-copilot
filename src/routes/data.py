@@ -25,7 +25,7 @@ async def upload_data(project_id: str , file : UploadFile ,
     return JSONResponse(
       status_code=status.HTTP_400_BAD_REQUEST , 
       content={
-        "signal":result_signal
+        "signal": result_signal.value
       }
     )
 
@@ -44,20 +44,18 @@ async def upload_data(project_id: str , file : UploadFile ,
       return JSONResponse(
       status_code=status.HTTP_400_BAD_REQUEST , 
       content={
-        "signal":ResponseSignal.FILE_UPLOAD_FAILED
+        "signal": ResponseSignal.FILE_UPLOAD_FAILED.value
       })
       
   return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
-                      "signal": ResponseSignal.FILE_UPLOAD_SUCCESS ,
-                      "file_id":file_id
+                      "signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value,
+                      "file_id": file_id
             }
     )
 
 
-#create endpoint to process the uploaded file
-# data is sent as json object 
 @data_router.post('/process/{project_id}')
 async def process_data(project_id: str , request:ProcessRequest ):
   file_id = request.file_id
@@ -67,18 +65,33 @@ async def process_data(project_id: str , request:ProcessRequest ):
   process_controller = ProcessController(project_id = project_id)  
 
   file_content = process_controller.get_file_content(file_id = file_id)
-  file_chunks = process_controller.process_file_content(file_content = file_content , file_id =file_id , chunk_size=chunk_size , overlap_size=overlap_size)
+
+  if file_content is None:
+    return JSONResponse(
+      status_code=status.HTTP_400_BAD_REQUEST,
+      content={
+        "signal": ResponseSignal.FILE_PROCESSING_FAILED.value
+      })
+
+  file_chunks = process_controller.process_file_content(file_content=file_content, file_id=file_id, chunk_size=chunk_size, overlap_size=overlap_size)
 
   if file_chunks is None or len(file_chunks) == 0:
     return JSONResponse(
       status_code=status.HTTP_400_BAD_REQUEST , 
       content={
-        "signal":ResponseSignal.FILE_PROCESSING_FAILED
+        "signal":ResponseSignal.FILE_PROCESSING_FAILED.value
       })
   
+  # Convert Document objects to JSON-serializable dicts
+  chunks_as_dicts = [
+    {"page_content": chunk.page_content, "metadata": chunk.metadata}
+    for chunk in file_chunks
+  ]
+
   return JSONResponse(
     status_code=status.HTTP_200_OK , 
     content={
-      "signal":ResponseSignal.FILE_PROCESSING_SUCCESS,
-      "file_chunks":file_chunks
+      "signal": ResponseSignal.FILE_PROCESSING_SUCCESS.value,
+      "file_chunks_count": len(chunks_as_dicts),
+      "file_chunks": chunks_as_dicts
     })
