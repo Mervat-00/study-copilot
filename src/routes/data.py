@@ -61,15 +61,15 @@ async def upload_data(project_id: str , file : UploadFile ,
 @data_router.post('/process/{project_id}')
 async def process_data(project_id: str , request:ProcessRequest ):
   file_id = request.file_id
-  chunck_size = request.chunck_size
+  chunk_size = request.chunk_size
   overlap_size = request.overlap_size
 
   process_controller = ProcessController(project_id = project_id)  
 
   file_content = process_controller.get_file_content(file_id = file_id)
-  file_chuncks = process_controller.process_file_content(file_content = file_content , file_id =file_id , chunck_size=chunck_size , overlap_size=overlap_size)
+  file_chunks = process_controller.process_file_content(file_content = file_content , file_id =file_id , chunk_size=chunk_size , overlap_size=overlap_size)
 
-  if file_chuncks is None or len(file_chuncks) == 0:
+  if file_chunks is None or len(file_chunks) == 0:
     return JSONResponse(
       status_code=status.HTTP_400_BAD_REQUEST , 
       content={
@@ -80,5 +80,5 @@ async def process_data(project_id: str , request:ProcessRequest ):
     status_code=status.HTTP_200_OK , 
     content={
       "signal":ResponseSignal.FILE_PROCESSING_SUCCESS,
-      "file_chuncks":file_chuncks
+      "file_chunks":file_chunks
     })
